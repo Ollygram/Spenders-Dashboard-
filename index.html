@@ -1,0 +1,1067 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Receipts</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #1a2332;
+        --bg2: #213040;
+        --bg3: #273848;
+        --ink: #e8f0f8;
+        --ink2: #b0c4d8;
+        --ink3: #6a8aaa;
+        --border: rgba(255, 255, 255, 0.08);
+        --border2: rgba(255, 255, 255, 0.14);
+        --green: #34d399;
+        --green2: #10b981;
+        --red: #f87171;
+        --radius: 14px;
+        --font: "Plus Jakarta Sans", sans-serif;
+        --font-mono: "DM Mono", monospace;
+        --shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
+        --shadow2: 0 4px 20px rgba(0, 0, 0, 0.4);
+
+        --food: #f59e0b;
+        --transport: #38bdf8;
+        --data: #a78bfa;
+        --fun: #fb7185;
+        --other: #94a3b8;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--font);
+        min-height: 100vh;
+      }
+      #root {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 0 1.5rem 5rem;
+      }
+
+      .header {
+        padding: 2.5rem 0 2rem;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      .header h1 {
+        font-size: clamp(1.8rem, 4vw, 2.4rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+      }
+      .header p {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        color: var(--ink3);
+        margin-top: 3px;
+        letter-spacing: 0.08em;
+      }
+
+      .filter-tabs {
+        display: flex;
+        gap: 4px;
+      }
+      .tab {
+        padding: 7px 16px;
+        border-radius: 100px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1.5px solid var(--border);
+        background: transparent;
+        color: var(--ink3);
+        font-family: var(--font);
+        transition: all 0.15s;
+      }
+      .tab:hover {
+        color: var(--ink);
+        border-color: var(--border2);
+      }
+      .tab.active {
+        background: var(--green2);
+        color: #fff;
+        border-color: var(--green2);
+      }
+
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 1.5rem;
+      }
+      @media (max-width: 640px) {
+        .stats-row {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      .stat-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.1rem 1.25rem;
+        box-shadow: var(--shadow);
+      }
+      .stat-label {
+        font-size: 0.62rem;
+        font-family: var(--font-mono);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink3);
+        margin-bottom: 6px;
+      }
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--ink);
+        letter-spacing: -0.02em;
+      }
+      .stat-sub {
+        font-size: 0.68rem;
+        color: var(--ink3);
+        margin-top: 3px;
+      }
+
+      .charts-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      @media (max-width: 640px) {
+        .charts-row {
+          grid-template-columns: 1fr;
+        }
+      }
+      .chart-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.25rem;
+        box-shadow: var(--shadow);
+      }
+      .chart-title {
+        font-size: 0.68rem;
+        font-family: var(--font-mono);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink3);
+        margin-bottom: 1rem;
+      }
+
+      .donut-wrap {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+      }
+      .donut-svg {
+        flex-shrink: 0;
+      }
+      .donut-legend {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+      .legend-row {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 0.78rem;
+      }
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        flex-shrink: 0;
+      }
+      .legend-label {
+        color: var(--ink2);
+        flex: 1;
+      }
+      .legend-amt {
+        font-weight: 600;
+        color: var(--ink);
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+      }
+
+      .bar-chart {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .bar-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .bar-day {
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        color: var(--ink3);
+        width: 28px;
+        flex-shrink: 0;
+        text-align: right;
+      }
+      .bar-track {
+        flex: 1;
+        background: var(--bg3);
+        border-radius: 4px;
+        height: 22px;
+        overflow: hidden;
+      }
+      .bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        padding-left: 8px;
+        font-size: 0.62rem;
+        font-weight: 600;
+        color: #fff;
+        transition: width 0.4s ease;
+        min-width: 0;
+      }
+      .bar-fill.zero {
+        background: transparent !important;
+      }
+      .bar-amt {
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        color: var(--ink3);
+        width: 48px;
+        text-align: right;
+        flex-shrink: 0;
+      }
+
+      .form-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+      }
+      .form-title {
+        font-size: 0.68rem;
+        font-family: var(--font-mono);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink3);
+        margin-bottom: 1rem;
+      }
+      .form-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .input,
+      .select {
+        background: var(--bg3);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 9px 13px;
+        color: var(--ink);
+        font-family: var(--font);
+        font-size: 0.88rem;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      .input:focus,
+      .select:focus {
+        border-color: var(--green2);
+      }
+      .input::placeholder {
+        color: var(--ink3);
+      }
+      .input-desc {
+        flex: 2;
+        min-width: 140px;
+      }
+      .input-amt {
+        width: 110px;
+      }
+      .select-cat {
+        width: 130px;
+      }
+      .input-date {
+        width: 140px;
+      }
+      /* make date picker readable on dark bg */
+      .input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(0.7);
+      }
+
+      .btn-add {
+        background: var(--green2);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 9px 20px;
+        font-family: var(--font);
+        font-size: 0.88rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          transform 0.1s;
+      }
+      .btn-add:hover {
+        background: var(--green);
+        color: #1a2332;
+      }
+      .btn-add:active {
+        transform: scale(0.97);
+      }
+
+      .form-error {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        color: var(--red);
+        margin-top: 8px;
+      }
+
+      .list-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+      }
+      .list-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .list-title {
+        font-size: 0.68rem;
+        font-family: var(--font-mono);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink3);
+      }
+      .list-count {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        color: var(--ink3);
+      }
+
+      .expense-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0.85rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        transition: background 0.12s;
+        animation: slideIn 0.2s ease;
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .expense-row:last-child {
+        border-bottom: none;
+      }
+      .expense-row:hover {
+        background: var(--bg3);
+      }
+
+      .cat-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .exp-desc {
+        flex: 1;
+        font-size: 0.88rem;
+        color: var(--ink);
+      }
+      .exp-cat {
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        color: var(--ink3);
+        width: 72px;
+      }
+      .exp-date {
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        color: var(--ink3);
+        width: 72px;
+      }
+      .exp-amt {
+        font-family: var(--font-mono);
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--green);
+        width: 72px;
+        text-align: right;
+      }
+      .btn-del {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--ink3);
+        font-size: 0.7rem;
+        padding: 3px 6px;
+        border-radius: 4px;
+        opacity: 0;
+        transition:
+          opacity 0.12s,
+          color 0.12s;
+      }
+      .expense-row:hover .btn-del {
+        opacity: 1;
+      }
+      .btn-del:hover {
+        color: var(--red);
+      }
+
+      .empty {
+        text-align: center;
+        padding: 3rem;
+        color: var(--ink3);
+        font-size: 0.82rem;
+        font-family: var(--font-mono);
+      }
+
+      .cat-food {
+        background: var(--food);
+      }
+      .cat-transport {
+        background: var(--transport);
+      }
+      .cat-data {
+        background: var(--data);
+      }
+      .cat-fun {
+        background: var(--fun);
+      }
+      .cat-other {
+        background: var(--other);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+      const { useState, useEffect, useMemo, useCallback } = React;
+
+      const STORAGE_KEY = "receipts-expenses";
+
+      const CATEGORIES = [
+        { id: "food", label: "Food", color: "#f59e0b" },
+        { id: "transport", label: "Transport", color: "#38bdf8" },
+        { id: "data", label: "Data", color: "#a78bfa" },
+        { id: "fun", label: "Fun", color: "#fb7185" },
+        { id: "other", label: "Other", color: "#94a3b8" },
+      ];
+
+      const CAT_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.id, c]));
+
+      const FILTERS = [
+        { id: "week", label: "This week" },
+        { id: "last-week", label: "Last week" },
+        { id: "all", label: "All time" },
+      ];
+
+      function startOfDay(d) {
+        const x = new Date(d);
+        x.setHours(0, 0, 0, 0);
+        return x;
+      }
+      function startOfWeek(d) {
+        const x = startOfDay(new Date(d));
+        x.setDate(x.getDate() - x.getDay());
+        return x;
+      }
+      function fmtDate(ts) {
+        return new Date(ts).toLocaleDateString([], {
+          month: "short",
+          day: "numeric",
+        });
+      }
+      function fmtAmt(n) {
+        return (
+          "₦" +
+          Number(n).toLocaleString("en-NG", {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          })
+        );
+      }
+      function todayISO() {
+        return new Date().toISOString().split("T")[0];
+      }
+
+      function loadExpenses() {
+        try {
+          const r = localStorage.getItem(STORAGE_KEY);
+          return r ? JSON.parse(r) : null;
+        } catch {
+          return null;
+        }
+      }
+      function saveExpenses(expenses) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+        } catch (e) {
+          console.warn("Storage write failed:", e);
+        }
+      }
+
+      function makeSeed() {
+        const now = Date.now(),
+          day = 86400000;
+        return [
+          {
+            id: 1,
+            desc: "Jollof rice & chicken",
+            category: "food",
+            amount: 2500,
+            date: now - 0 * day,
+            createdAt: now,
+          },
+          {
+            id: 2,
+            desc: "Bolt ride to island",
+            category: "transport",
+            amount: 1800,
+            date: now - 1 * day,
+            createdAt: now - 1 * day,
+          },
+          {
+            id: 3,
+            desc: "MTN data bundle 5GB",
+            category: "data",
+            amount: 2000,
+            date: now - 1 * day,
+            createdAt: now - 1 * day,
+          },
+          {
+            id: 4,
+            desc: "Cinema outing",
+            category: "fun",
+            amount: 5500,
+            date: now - 2 * day,
+            createdAt: now - 2 * day,
+          },
+          {
+            id: 5,
+            desc: "Pepper & tomatoes",
+            category: "food",
+            amount: 800,
+            date: now - 2 * day,
+            createdAt: now - 2 * day,
+          },
+          {
+            id: 6,
+            desc: "BRT fare",
+            category: "transport",
+            amount: 300,
+            date: now - 3 * day,
+            createdAt: now - 3 * day,
+          },
+          {
+            id: 7,
+            desc: "Airtime recharge",
+            category: "data",
+            amount: 500,
+            date: now - 3 * day,
+            createdAt: now - 3 * day,
+          },
+          {
+            id: 8,
+            desc: "Suya spot with friends",
+            category: "fun",
+            amount: 4200,
+            date: now - 4 * day,
+            createdAt: now - 4 * day,
+          },
+          {
+            id: 9,
+            desc: "Bole & fish",
+            category: "food",
+            amount: 1500,
+            date: now - 4 * day,
+            createdAt: now - 4 * day,
+          },
+          {
+            id: 10,
+            desc: "Tissue & sachet water",
+            category: "other",
+            amount: 650,
+            date: now - 5 * day,
+            createdAt: now - 5 * day,
+          },
+          {
+            id: 11,
+            desc: "Okada to market",
+            category: "transport",
+            amount: 200,
+            date: now - 5 * day,
+            createdAt: now - 5 * day,
+          },
+          {
+            id: 12,
+            desc: "Shawarma night",
+            category: "food",
+            amount: 3200,
+            date: now - 6 * day,
+            createdAt: now - 6 * day,
+          },
+        ];
+      }
+
+      function DonutChart({ data, size = 140 }) {
+        const cx = size / 2,
+          cy = size / 2,
+          r = 52,
+          stroke = 22;
+        const circumference = 2 * Math.PI * r;
+        const total = data.reduce((s, d) => s + d.value, 0);
+
+        if (total === 0)
+          return (
+            <svg width={size} height={size} className="donut-svg">
+              <circle
+                cx={cx}
+                cy={cy}
+                r={r}
+                fill="none"
+                stroke="rgba(255,255,255,0.08)"
+                strokeWidth={stroke}
+              />
+              <text
+                x={cx}
+                y={cy + 5}
+                textAnchor="middle"
+                fontSize="12"
+                fill="#6a8aaa"
+                fontFamily="DM Mono"
+              >
+                empty
+              </text>
+            </svg>
+          );
+
+        let offset = 0;
+        const slices = data.map((d) => {
+          const dash = (d.value / total) * circumference;
+          const s = { ...d, dash, gap: circumference - dash, offset };
+          offset += dash;
+          return s;
+        });
+
+        return (
+          <svg width={size} height={size} className="donut-svg">
+            <circle
+              cx={cx}
+              cy={cy}
+              r={r}
+              fill="none"
+              stroke="rgba(255,255,255,0.06)"
+              strokeWidth={stroke}
+            />
+            {slices.map((s, i) => (
+              <circle
+                key={i}
+                cx={cx}
+                cy={cy}
+                r={r}
+                fill="none"
+                stroke={s.color}
+                strokeWidth={stroke}
+                strokeDasharray={`${s.dash} ${s.gap}`}
+                strokeDashoffset={circumference / 4 - s.offset}
+                style={{ transition: "stroke-dasharray 0.5s ease" }}
+              />
+            ))}
+            <text
+              x={cx}
+              y={cy - 6}
+              textAnchor="middle"
+              fontSize="10"
+              fill="#6a8aaa"
+              fontFamily="DM Mono"
+            >
+              total
+            </text>
+            <text
+              x={cx}
+              y={cy + 10}
+              textAnchor="middle"
+              fontSize="13"
+              fontWeight="700"
+              fill="#e8f0f8"
+              fontFamily="Plus Jakarta Sans"
+            >
+              {fmtAmt(total)}
+            </text>
+          </svg>
+        );
+      }
+
+      function BarChart({ expenses }) {
+        const days = useMemo(() => {
+          const arr = [];
+          for (let i = 6; i >= 0; i--) {
+            const d = startOfDay(new Date(Date.now() - i * 86400000));
+            const end = new Date(d);
+            end.setDate(end.getDate() + 1);
+            const total = expenses
+              .filter((e) => e.date >= d.getTime() && e.date < end.getTime())
+              .reduce((s, e) => s + e.amount, 0);
+            arr.push({
+              label: d.toLocaleDateString([], { weekday: "short" }).slice(0, 3),
+              total,
+            });
+          }
+          return arr;
+        }, [expenses]);
+
+        const maxVal = Math.max(...days.map((d) => d.total), 1);
+
+        return (
+          <div className="bar-chart">
+            {days.map((d, i) => {
+              const pct = (d.total / maxVal) * 100;
+              return (
+                <div key={i} className="bar-row">
+                  <span className="bar-day">{d.label}</span>
+                  <div className="bar-track">
+                    <div
+                      className={`bar-fill${d.total === 0 ? " zero" : ""}`}
+                      style={{
+                        width: `${pct}%`,
+                        background: pct > 0 ? "#10b981" : "transparent",
+                      }}
+                    >
+                      {pct > 20 && fmtAmt(d.total)}
+                    </div>
+                  </div>
+                  <span className="bar-amt">
+                    {d.total > 0 ? fmtAmt(d.total) : "—"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+
+      function App() {
+        const [expenses, setExpenses] = useState(
+          () => loadExpenses() ?? makeSeed(),
+        );
+        const [filter, setFilter] = useState("week");
+        const [desc, setDesc] = useState("");
+        const [amount, setAmount] = useState("");
+        const [category, setCategory] = useState("food");
+        const [date, setDate] = useState(todayISO);
+        const [formError, setFormError] = useState("");
+
+        useEffect(() => {
+          saveExpenses(expenses);
+        }, [expenses]);
+
+        const { rangeStart, rangeEnd } = useMemo(() => {
+          const now = new Date();
+          const thisWeekStart = startOfWeek(now);
+          const lastWeekStart = new Date(thisWeekStart);
+          lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+          const lastWeekEnd = new Date(thisWeekStart);
+          if (filter === "week")
+            return {
+              rangeStart: thisWeekStart,
+              rangeEnd: new Date(now.getTime() + 86400000),
+            };
+          if (filter === "last-week")
+            return { rangeStart: lastWeekStart, rangeEnd: lastWeekEnd };
+          return {
+            rangeStart: new Date(0),
+            rangeEnd: new Date(now.getTime() + 86400000),
+          };
+        }, [filter]);
+
+        const filtered = useMemo(
+          () =>
+            expenses
+              .filter(
+                (e) =>
+                  e.date >= rangeStart.getTime() && e.date < rangeEnd.getTime(),
+              )
+              .sort((a, b) => b.date - a.date),
+          [expenses, rangeStart, rangeEnd],
+        );
+
+        const totalSpend = useMemo(
+          () => filtered.reduce((s, e) => s + e.amount, 0),
+          [filtered],
+        );
+
+        const categoryTotals = useMemo(() => {
+          const map = {};
+          filtered.forEach((e) => {
+            map[e.category] = (map[e.category] || 0) + e.amount;
+          });
+          return CATEGORIES.map((c) => ({
+            ...c,
+            value: map[c.id] || 0,
+          })).filter((c) => c.value > 0);
+        }, [filtered]);
+
+        const weekTotal = useMemo(() => {
+          const weekStart = startOfWeek(new Date()).getTime();
+          return expenses
+            .filter((e) => e.date >= weekStart)
+            .reduce((s, e) => s + e.amount, 0);
+        }, [expenses]);
+
+        const topCategory = useMemo(() => {
+          if (!filtered.length) return "—";
+          const map = {};
+          filtered.forEach((e) => {
+            map[e.category] = (map[e.category] || 0) + e.amount;
+          });
+          const top = Object.entries(map).sort((a, b) => b[1] - a[1])[0];
+          return top ? CAT_MAP[top[0]]?.label : "—";
+        }, [filtered]);
+
+        const addExpense = useCallback(() => {
+          if (!desc.trim()) {
+            setFormError("Add a description.");
+            return;
+          }
+          if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+            setFormError("Enter a valid amount.");
+            return;
+          }
+          if (!date) {
+            setFormError("Choose a date.");
+            return;
+          }
+          const dateTs = new Date(date).getTime();
+          if (isNaN(dateTs)) {
+            setFormError("Invalid date.");
+            return;
+          }
+          setFormError("");
+          setExpenses((prev) => [
+            {
+              id: Date.now(),
+              desc: desc.trim(),
+              category,
+              amount: Number(amount),
+              date: dateTs,
+              createdAt: Date.now(),
+            },
+            ...prev,
+          ]);
+          setDesc("");
+          setAmount("");
+          setCategory("food");
+          setDate(todayISO());
+        }, [desc, amount, category, date]);
+
+        const deleteExpense = useCallback((id) => {
+          setExpenses((prev) => prev.filter((e) => e.id !== id));
+        }, []);
+
+        return (
+          <>
+            <header className="header">
+              <div>
+                <h1>Receipts</h1>
+                <p>track what your money has been doing</p>
+              </div>
+              <div className="filter-tabs">
+                {FILTERS.map((f) => (
+                  <button
+                    key={f.id}
+                    className={`tab${filter === f.id ? " active" : ""}`}
+                    onClick={() => setFilter(f.id)}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </header>
+
+            <div className="stats-row">
+              <div className="stat-card">
+                <div className="stat-label">total spend</div>
+                <div className="stat-value">{fmtAmt(totalSpend)}</div>
+                <div className="stat-sub">
+                  {FILTERS.find((f) => f.id === filter)?.label}
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-label">this week</div>
+                <div className="stat-value">{fmtAmt(weekTotal)}</div>
+                <div className="stat-sub">7-day total</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-label">transactions</div>
+                <div className="stat-value">{filtered.length}</div>
+                <div className="stat-sub">in period</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-label">top category</div>
+                <div className="stat-value" style={{ fontSize: "1.1rem" }}>
+                  {topCategory}
+                </div>
+                <div className="stat-sub">by spend</div>
+              </div>
+            </div>
+
+            <div className="charts-row">
+              <div className="chart-card">
+                <div className="chart-title">spend by category</div>
+                {filtered.length === 0 ? (
+                  <div
+                    className="empty"
+                    style={{ padding: "1rem 0", textAlign: "left" }}
+                  >
+                    no data for this period
+                  </div>
+                ) : (
+                  <div className="donut-wrap">
+                    <DonutChart data={categoryTotals} />
+                    <div className="donut-legend">
+                      {categoryTotals.map((c) => (
+                        <div key={c.id} className="legend-row">
+                          <span
+                            className="legend-dot"
+                            style={{ background: c.color }}
+                          />
+                          <span className="legend-label">{c.label}</span>
+                          <span className="legend-amt">{fmtAmt(c.value)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="chart-card">
+                <div className="chart-title">daily spend — last 7 days</div>
+                <BarChart expenses={expenses} />
+              </div>
+            </div>
+
+            <div className="form-card">
+              <div className="form-title">add expense</div>
+              <div className="form-row">
+                <input
+                  className="input input-desc"
+                  placeholder="what did you spend on?"
+                  value={desc}
+                  onChange={(e) => setDesc(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && addExpense()}
+                  maxLength={80}
+                />
+                <input
+                  className="input input-amt"
+                  type="number"
+                  placeholder="amount"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  min="0"
+                />
+                <select
+                  className="select select-cat"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                >
+                  {CATEGORIES.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  className="input input-date"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  max={todayISO()}
+                />
+                <button className="btn-add" onClick={addExpense}>
+                  + Add
+                </button>
+              </div>
+              {formError && <p className="form-error">{formError}</p>}
+            </div>
+
+            <div className="list-card">
+              <div className="list-header">
+                <span className="list-title">expenses</span>
+                <span className="list-count">
+                  {filtered.length} items · {fmtAmt(totalSpend)}
+                </span>
+              </div>
+              {filtered.length === 0 ? (
+                <div className="empty">
+                  no expenses in this period — add one above
+                </div>
+              ) : (
+                filtered.map((e) => (
+                  <div key={e.id} className="expense-row">
+                    <span className={`cat-dot cat-${e.category}`} />
+                    <span className="exp-desc">{e.desc}</span>
+                    <span className="exp-cat">
+                      {CAT_MAP[e.category]?.label}
+                    </span>
+                    <span className="exp-date">{fmtDate(e.date)}</span>
+                    <span className="exp-amt">{fmtAmt(e.amount)}</span>
+                    <button
+                      className="btn-del"
+                      onClick={() => deleteExpense(e.id)}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+  </body>
+</html>
